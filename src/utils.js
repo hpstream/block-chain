@@ -19,7 +19,7 @@ function formatLog(data) {
   });
 
   let res = data.map(v => {
-    return keys.map(h => v[h])
+    return keys.map(h => JSON.stringify(v[h], null, 1))
   });
   // console.log(keys)
   table.push(...res);

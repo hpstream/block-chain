@@ -19,6 +19,22 @@ module.exports = class Blockchain {
   getBlockChain() {
     return this.blockchain
   }
+  // 进行交易
+  transfer(form, to, amount) {
+    // 签名校验，后面完成
+    const transObj = {
+      form,
+      to,
+      amount
+    }
+    this.data.push(transObj)
+
+    return transObj
+  }
+  // 查看区块详情
+  findBlockDetail(index) {
+    return this.blockchain[index]
+  }
   // 获取最新区块
   getLastBlock() {
     return this.blockchain[this.blockchain.length - 1]
@@ -47,13 +63,15 @@ module.exports = class Blockchain {
     }
   }
   // 挖矿
-  mine() {
+  mine(address) {
     // 1. 生成新区块 一页新的记账加入了区块链
     // 2. 不停的计算哈希， 知道计算出符合条件的哈希值，获得记账权
+    this.transfer('0', address, 100)
     const newBlock = this.generateNewBlock();
     // console.log(this.isValidBlock(newBlock))
     if (this.isValidBlock(newBlock) && this.isValidChain()) {
       this.blockchain.push(newBlock)
+      this.data = [];
       return newBlock;
     } else {
       console.log('error, invalid Block', newBlock)
