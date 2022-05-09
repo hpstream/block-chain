@@ -15,15 +15,44 @@ module.exports = class Blockchain {
     this.difficulty = 4;
     // const hash = this.computeHash(0, '0', 1652002445297, 'hello block-chain', 2)
   }
+  // 查看余额
+  blance(address) {
+    let blance = 0;
+    this.blockchain.forEach(block => {
+      // 创世区块是一个字符串，所以不用遍历
+
+      if (Array.isArray(block.data)) {
+        block.data.forEach((trans) => {
+          if (address === trans.from) {
+            blance -= trans.amount
+          }
+          if (address === trans.to) {
+            blance += trans.amount
+          }
+        })
+      }
+
+    })
+
+    return blance
+  }
   // 查看区块链
   getBlockChain() {
     return this.blockchain
   }
   // 进行交易
-  transfer(form, to, amount) {
+  transfer(from, to, amount) {
     // 签名校验，后面完成
+    if (from !== '0') {
+      // 交易非挖矿
+      const blance = this.blance(from)
+      if (blance < amount) {
+        console.log('not enough blance', from, blance, amount)
+        return
+      }
+    }
     const transObj = {
-      form,
+      from,
       to,
       amount
     }

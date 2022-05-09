@@ -14,7 +14,7 @@ function formatLog(data) {
   // instantiate
   let keys = Object.keys(data[0])
   let table = new Table({
-    head: ['index', 'data', 'prevHash', 'timestamp', 'nonce', 'hash'],
+    head: keys,
     colWidths: new Array(keys.length).fill(15)
   });
 

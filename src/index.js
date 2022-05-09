@@ -26,7 +26,23 @@ vorpal
   .command('trans <from> <to> <amount>', '转账')
   .action(function (args, callback) {
     let trans = bc.transfer(args.from, args.to, args.amount)
-    formatLog(trans)
+    if (trans) {
+      formatLog(trans)
+    }
+
+    callback();
+  })
+vorpal
+  .command('blance <address>', '查看余额')
+  .action(function (args, callback) {
+    let wallet = bc.blance(args.address)
+    console.log(wallet)
+    if (wallet) {
+      formatLog({
+        wallet,
+        address: args.address
+      })
+    }
     callback();
   })
 
