@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/hpstream/block-chain/issues"
   },
-  "homepage": "https://github.com/hpstream/block-chain#readme"
+  "homepage": "https://github.com/hpstream/block-chain#readme",
+  "dependencies": {
+    "cli-table": "^0.3.11",
+    "vorpal": "^1.12.0"
+  }
 }
