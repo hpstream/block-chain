@@ -21,5 +21,8 @@
   "dependencies": {
     "cli-table": "^0.3.11",
     "vorpal": "^1.12.0"
+  },
+  "devDependencies": {
+    "elliptic": "^6.5.4"
   }
 }
