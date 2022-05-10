@@ -1,4 +1,6 @@
 const crypto = require('crypto');
+const dgram = require('dgram')
+
 // 创世区块
 let initBlock = {
   index: 0,
@@ -13,7 +15,76 @@ module.exports = class Blockchain {
     this.blockchain = [initBlock];
     this.data = [];
     this.difficulty = 4;
-    // const hash = this.computeHash(0, '0', 1652002445297, 'hello block-chain', 2)
+    // 所有的网络节点信息，address,port
+    this.peers = [];
+    // 种子节点
+    this.seed = {
+      port: 8001,
+      address: 'localhost'
+    }
+    this.udp = dgram.createSocket('udp4');
+    this.init();
+
+  }
+  init() {
+    this.bindP2p();
+    this.bindExit();
+  }
+  bindP2p() {
+    // 网络发来的请求
+    this.udp.on('message', (data, remote) => {
+      const {
+        address,
+        port
+      } = remote;
+      const action = JSON.parse(data);
+      // {
+      //   type:'',
+      //   data:{}
+      // }
+      if (action.type) {
+        this.dispatch(action, {
+          address,
+          port
+        })
+      }
+    })
+
+    this.udp.on('listening', () => {
+      const address = this.udp.address();
+      console.log(`[信息]： udp监听完毕 端口是:${address.port}`)
+    })
+    // 区分种子节点和普通节点，普通阶段端口号0即可，随便分配一个空闲端口
+    // 种子阶段必须是固定的端口号
+    let port = Number(process.argv[2]) || 0
+    this.starNode(port)
+  }
+  starNode(port) {
+    this.udp.bind(port)
+    if (port !== 8001) {
+      this.send({
+        type: 'newpper',
+      }, this.seed.port, this.seed.address)
+    }
+  }
+  dispatch(action, remote) {
+    switch (action.type) {
+      case 'newpper':
+        console.log(`你好我是新节点`, remote)
+        break;
+
+      default:
+        break;
+    }
+
+  }
+  send(data, port, address) {
+    this.udp.send(JSON.stringify(data), port, address)
+  }
+  bindExit() {
+    process.on('exit', () => {
+      console.log(`[信息]： 有缘再见`)
+    })
   }
   // 查看余额
   blance(address) {
