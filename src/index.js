@@ -53,6 +53,30 @@ vorpal
     callback();
   })
 
+vorpal
+  .command('peers', '查看网络节点列表')
+  .action(function (args, callback) {
+    formatLog(bc.getPeers());
+    callback();
+  })
+vorpal
+  .command('chat <msg>', '跟别人节点hi一下')
+  .action(function (args, callback) {
+    bc.sendMsg(args.msg)
+    callback();
+  })
+
+vorpal
+  .command('exit ', '退出')
+  .action(function (args, callback) {
+    bc.leaveP2p();
+
+    setTimeout(() => {
+      process.exit()
+    }, 1000);
+    callback();
+  })
+
 vorpal.exec('help')
 vorpal
   .delimiter('chain =>$')

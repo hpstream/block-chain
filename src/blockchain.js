@@ -17,6 +17,8 @@ module.exports = class Blockchain {
     this.difficulty = 4;
     // 所有的网络节点信息，address,port
     this.peers = [];
+    //
+    this.remote = {};
     // 种子节点
     this.seed = {
       port: 8001,
@@ -42,6 +44,7 @@ module.exports = class Blockchain {
       //   type:'',
       //   data:{}
       // }
+      // console.log('type', action.type)
       if (action.type) {
         this.dispatch(action, {
           address,
@@ -65,26 +68,114 @@ module.exports = class Blockchain {
       this.send({
         type: 'newpper',
       }, this.seed.port, this.seed.address)
+      this.peers.push(this.seed)
     }
   }
   dispatch(action, remote) {
     switch (action.type) {
       case 'newpper':
-        console.log(`你好我是新节点`, remote)
+        // 种子节点要做的事情
+        // 1.你的公网ip和port是啥
+        this.send({
+          type: 'remoteAddress',
+          data: remote
+        }, remote.port, remote.address)
+        // 2.现在全部节点的列表
+        this.send({
+          type: 'peerlist',
+          data: this.peers
+        }, remote.port, remote.address)
+
+        // 3.告诉所有已经节点，来了新朋友，赶快打招呼
+        this.boardcast({
+          type: 'sayhi',
+          data: remote
+        })
+        this.peers.push(remote)
+        // 4.告诉你现在区块链的数据
+        // console.log(`你好我是新节点`, remote)
+        break;
+      case 'remoteAddress':
+        // 存放远程消息，退出的时候用
+        this.remote = action.data
+        break;
+      case 'peerlist':
+        // 远程告诉我，现在的阶段列表
+        const newPeers = action.data;
+        this.addPeers(newPeers)
+        break;
+      case 'sayhi':
+        let remotePeer = action.data;
+        this.peers.push(remotePeer);
+        console.log(`[信息] 新朋友你好，相识就是缘分，请你喝茶`)
+        this.send({
+          type: 'hi',
+          data: 'hi'
+        }, remote.port, remote.address)
+        break;
+      case 'hi':
+        // console.log(this.peers)
+        console.log(`${remote.address}:${remote.port} 发送消息: ${action.data}`)
+        break;
+      case 'removePeer':
+        this.removePeer(action, remote.port, remote.address)
         break;
 
       default:
+        console.log(`这个action不认识`)
         break;
     }
 
+  }
+  removePeer(action) {
+    // console.log(action)
+    var peer = action.data;
+    var index = this.peers.findIndex(v => this.isEqualPeer(peer, v));
+    this.peers.splice(index, 1);
+  }
+  boardcast(action) {
+    // console.log(this.peers)
+    this.peers.forEach((v) => {
+      this.send(action, v.port, v.address)
+    })
+  }
+  isEqualPeer(peer1, peer2) {
+    return peer1.address === peer2.address && peer1.port === peer2.port
+  }
+  addPeers(peers) {
+    peers.forEach(peer => {
+      // 如果节点不存在，就添加一个到peers中
+      if (!this.peers.find(v => this.isEqualPeer(peer, v))) {
+        this.peers.push(peer)
+      }
+    })
   }
   send(data, port, address) {
     this.udp.send(JSON.stringify(data), port, address)
   }
   bindExit() {
     process.on('exit', () => {
-      console.log(`[信息]： 有缘再见`)
+      // console.log(this.peers)
+      console.log(`[信息]： 有缘再见 ${this.remote.address} ${this.remote.port}`);
     })
+  }
+  // 群发消息
+  sendMsg(msg) {
+    this.boardcast({
+      type: 'hi',
+      data: msg
+    })
+  }
+  // 离开p2p网络：
+  leaveP2p() {
+    this.boardcast({
+      type: 'removePeer',
+      data: this.remote
+    })
+  }
+  // 获取网络节点
+  getPeers() {
+    return this.peers || []
   }
   // 查看余额
   blance(address) {
