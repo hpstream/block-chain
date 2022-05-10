@@ -1,4 +1,5 @@
 var EC = require('elliptic').ec;
+var fs = require('fs');
 
 // Create and initialize EC context
 // (better do it once and reuse it)
@@ -8,18 +9,66 @@ var ec = new EC('secp256k1');
 var keyPair = ec.genKeyPair();
 // getPrivate 
 // getPublic
-const res = {
-  prv: keyPair.getPrivate('hex').toString(),
-  pub: keyPair.getPublic('hex').toString()
+
+function getPub(prv) {
+  return ec.keyFromPrivate(pre).getPublic('hex').toString()
 }
 
-// Sign the message's hash (input must be an array, or a hex-string)
-var msgHash = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-var signature = keyPair.sign(msgHash);
+function generateKeys() {
+  const fileName = './wallet.json'
+  try {
+    var res = JSON.parse(fs.readFileSync(fileName, {
+      encoding: 'utf8'
+    }))
+    if (res.prv && res.pub && getPub(res.prv) === res.pub) {
+      keyPair = ec.keyFromPrivate(res.prv)
+      return res;
+    } else {
+      throw `not valid wallet.json`
+    }
+  } catch (error) {
+    const res = {
+      prv: keyPair.getPrivate('hex').toString(),
+      pub: keyPair.getPublic('hex').toString()
+    }
+    fs.writeFileSync(fileName, JSON.stringify(res))
+  }
+}
 
-// Export DER encoded signature in Array
-var derSign = signature.toDER('hex');
-console.log(derSign)
+function sign({
+  from,
+  to,
+  amount
+}) {
+  const bufferMsg = Buffer.from(`${from}-${to}-${amount}`)
+  let sinature = Buffer.from(keyPair.sign(bufferMsg).toDER()).toString('hex')
+  return sinature
+}
 
-// Verify signature
-console.log(keyPair.verify(msgHash, derSign));
+function verify({
+  from,
+  to,
+  amount,
+  signature
+}, pub) {
+  const keyPairTemp = ec.keyFromPublic(pub, 'hex');
+  const bufferMsg = Buffer.from(`${from}-${to}-${amount}`)
+  return keyPairTemp.verify(bufferMsg, signature)
+}
+
+const keys = generateKeys()
+const amount = {
+  from: 'hp',
+  to: 'kp',
+  amount: 100
+}
+const signature = sign(amount)
+amount.signature = signature
+
+const isVerity = verify({
+  from: 'hp',
+  to: 'kp',
+  amount: 10,
+  signature
+}, keyPair.pub)
+console.log(isVerity)
