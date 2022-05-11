@@ -1,5 +1,6 @@
-const crypto = require('crypto');
+const crypto = require('crypto')
 const dgram = require('dgram')
+const rsa = require('./rsa')
 
 // 创世区块
 let initBlock = {
@@ -213,11 +214,18 @@ module.exports = class Blockchain {
         return
       }
     }
-    const transObj = {
+    let sig = rsa.sign({
       from,
       to,
       amount
+    })
+    let transObj = {
+      from,
+      to,
+      amount,
+      sig
     }
+
     this.data.push(transObj)
 
     return transObj
@@ -253,8 +261,17 @@ module.exports = class Blockchain {
       hash
     }
   }
+  isValidTransfer(trans) {
+    return rsa.verify(trans, trans.from)
+  }
+
   // 挖矿
   mine(address) {
+    // 校验合法性
+    if (!this.data.every(v => this.isValidTransfer(v))) {
+      console.log(`trans not valid`)
+      return
+    }
     // 1. 生成新区块 一页新的记账加入了区块链
     // 2. 不停的计算哈希， 知道计算出符合条件的哈希值，获得记账权
     this.transfer('0', address, 100)

@@ -11,7 +11,7 @@ var keyPair = ec.genKeyPair();
 // getPublic
 
 function getPub(prv) {
-  return ec.keyFromPrivate(pre).getPublic('hex').toString()
+  return ec.keyFromPrivate(prv).getPublic('hex').toString()
 }
 
 function generateKeys() {
@@ -56,20 +56,9 @@ function verify({
   const bufferMsg = Buffer.from(`${from}-${to}-${amount}`)
   return keyPairTemp.verify(bufferMsg, signature)
 }
-
 const keys = generateKeys()
-const amount = {
-  from: 'hp',
-  to: 'kp',
-  amount: 100
+module.exports = {
+  sign,
+  verify,
+  keys
 }
-const signature = sign(amount)
-amount.signature = signature
-
-const isVerity = verify({
-  from: 'hp',
-  to: 'kp',
-  amount: 10,
-  signature
-}, keyPair.pub)
-console.log(isVerity)

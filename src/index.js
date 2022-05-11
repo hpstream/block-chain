@@ -1,5 +1,6 @@
 const vorpal = require('vorpal')();
 const Blockchain = require('./blockchain')
+const rsa = require('./rsa')
 const {
   formatLog
 } = require('./utils')
@@ -8,9 +9,9 @@ const {
 let bc = new Blockchain();
 
 vorpal
-  .command('mine <address>', '挖矿')
+  .command('mine', '挖矿')
   .action(function (args, callback) {
-    formatLog(bc.mine(args.address));
+    formatLog(bc.mine(rsa.keys.pub));
     callback();
   })
 
@@ -23,9 +24,9 @@ vorpal
   })
 
 vorpal
-  .command('trans <from> <to> <amount>', '转账')
+  .command('trans <to> <amount>', '转账')
   .action(function (args, callback) {
-    let trans = bc.transfer(args.from, args.to, args.amount)
+    let trans = bc.transfer(rsa.keys.pub, args.to, args.amount)
     if (trans) {
       formatLog(trans)
     }
@@ -33,14 +34,14 @@ vorpal
     callback();
   })
 vorpal
-  .command('blance <address>', '查看余额')
+  .command('blance', '查看余额')
   .action(function (args, callback) {
-    let wallet = bc.blance(args.address)
-    console.log(wallet)
+    let wallet = bc.blance(rsa.keys.pub)
+    // console.log(wallet)
     if (wallet) {
       formatLog({
         wallet,
-        address: args.address
+        address: rsa.keys.pub
       })
     }
     callback();
@@ -63,6 +64,12 @@ vorpal
   .command('chat <msg>', '跟别人节点hi一下')
   .action(function (args, callback) {
     bc.sendMsg(args.msg)
+    callback();
+  })
+vorpal
+  .command('pub', '查看本地地址')
+  .action(function (args, callback) {
+    console.log(rsa.keys.pub)
     callback();
   })
 
