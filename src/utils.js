@@ -7,7 +7,8 @@ var Table = require('cli-table');
 
 
 function formatLog(data) {
-  if (!data && data.length === 0) {
+
+  if (data && data.length === 0) {
     return;
   }
   if (!Array.isArray(data)) {

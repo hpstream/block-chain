@@ -39,9 +39,10 @@ function generateKeys() {
 function sign({
   from,
   to,
-  amount
+  amount,
+  timestamp
 }) {
-  const bufferMsg = Buffer.from(`${from}-${to}-${amount}`)
+  const bufferMsg = Buffer.from(`${timestamp}-${amount}-${from}-${to}`)
   let sinature = Buffer.from(keyPair.sign(bufferMsg).toDER()).toString('hex')
   return sinature
 }
@@ -50,10 +51,11 @@ function verify({
   from,
   to,
   amount,
+  timestamp,
   signature
 }, pub) {
   const keyPairTemp = ec.keyFromPublic(pub, 'hex');
-  const bufferMsg = Buffer.from(`${from}-${to}-${amount}`)
+  const bufferMsg = Buffer.from(`${timestamp}-${amount}-${from}-${to}`)
   return keyPairTemp.verify(bufferMsg, signature)
 }
 const keys = generateKeys()

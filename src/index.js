@@ -67,6 +67,12 @@ vorpal
     callback();
   })
 vorpal
+  .command('pedding ', '查看未打包的交易')
+  .action(function (args, callback) {
+    formatLog(bc.getData())
+    callback();
+  })
+vorpal
   .command('pub', '查看本地地址')
   .action(function (args, callback) {
     console.log(rsa.keys.pub)
