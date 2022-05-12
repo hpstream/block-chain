@@ -4,6 +4,8 @@
 
 > lsof -i:80 // 查看端口号被那个服务占用
 > kill -9 [pid] // 关闭端口号
-
+```
+偶然发现的一个“穿墙”工具，可以用来访问google，youtube等。通过我注册送你5元现金： https://find.trojanxisbest.top/auth/register?code=Ltu6
+```
 ## 区块链核心知识点
 1. 哈希函数
